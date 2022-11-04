@@ -3,6 +3,7 @@ package com.customer.rewards.service;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,13 +63,17 @@ public class RewardsAppService implements RewardService{
             }
         }
 
-        List<Purchase> purchasesForFirstMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().isBefore(LocalDate.now().minusMonths(1)))
+        Month firstMonth = LocalDate.now().getMonth().minus(1);
+        Month secondMonth = LocalDate.now().getMonth().minus(2);
+        Month thirdMonth = LocalDate.now().getMonth().minus(3);
+
+        List<Purchase> purchasesForFirstMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().getMonth() == firstMonth)
                 .collect(Collectors.toList());
 
-        List<Purchase> purchasesForSecondMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().isBefore(LocalDate.now().minusMonths(3)))
+        List<Purchase> purchasesForSecondMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().getMonth() == secondMonth)
                 .collect(Collectors.toList());
 
-        List<Purchase> purchasesForThirdMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().isBefore(LocalDate.now().minusMonths(3)))
+        List<Purchase> purchasesForThirdMonth = purchases.stream().filter(purchase -> purchase.getPurchaseDate().getMonth() == thirdMonth)
                 .collect(Collectors.toList());
 
         int rewardsPointsForFirstMonth = calculateRewardPointsPerMonth(purchasesForFirstMonth);
@@ -85,7 +90,7 @@ public class RewardsAppService implements RewardService{
         rewardsSummary.setTotalRewardPoints(calculatedRewardPoints);
         rewardsSummary.setCustomerId(customerId);
 
-        if(CollectionUtils.isEmpty(purchases) || calculatedRewardPoints == -1) {
+        if(CollectionUtils.isEmpty(purchases)) {
             throw new RewardsAppNoDataException("Customer Id doesn't exists, hence no data found", "FAILURE");
         }
         return rewardsSummary;
@@ -104,7 +109,7 @@ public class RewardsAppService implements RewardService{
                 BigDecimal totalAmount = purchase.getPurchaseAmount();
                 if(totalAmount.compareTo(BigDecimal.valueOf(50)) > 0) { // >50 // 120
                     if(totalAmount.compareTo(BigDecimal.valueOf(100)) < 0) { // >50 && < 100
-                        totalAmount = BigDecimal.valueOf(100).subtract(totalAmount);
+                        totalAmount = totalAmount.subtract(BigDecimal.valueOf(50));
                         totalRewardPoints += totalAmount.intValue();
                     } else {
                         totalAmount = totalAmount.subtract(BigDecimal.valueOf(100)); // > 100
