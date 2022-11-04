@@ -63,6 +63,10 @@ public class RewardsAppService implements RewardService{
             }
         }
 
+        if(CollectionUtils.isEmpty(purchases)) {
+            throw new RewardsAppNoDataException("Customer Id doesn't exists, hence no data found", "FAILURE");
+        }
+
         Month firstMonth = LocalDate.now().getMonth().minus(1);
         Month secondMonth = LocalDate.now().getMonth().minus(2);
         Month thirdMonth = LocalDate.now().getMonth().minus(3);
